@@ -26,6 +26,11 @@
 
 /modules/misc/xdg-user-dirs.nix                       @pacien
 
+/modules/misc/xdg-desktop-entries.nix                 @cwyc
+/tests/modules/misc/xdg/desktop-entries.nix           @cwyc
+/tests/modules/misc/xdg/desktop-full-expected.desktop @cwyc
+/tests/modules/misc/xdg/desktop-min-expected.desktop  @cwyc
+
 /modules/programs/aria2.nix                           @JustinLovinger
 
 /modules/programs/autorandr.nix                       @uvNikita

@@ -13,16 +13,15 @@ let
       # `name` on makeDesktopItem is controlled by this module's key in the attrset.
       # This is the file's filename excluding ".desktop".
 
-      # `extraEntries` on makeDesktopItem is controlled by `extraConfig` 
+      # `extraEntries` on makeDesktopItem is controlled by `extraConfig`,
+      # and `extraDesktopEntries` by `settings`,
       # to match what's commonly used by other home manager modules.
 
-      # `terminal` and `startupNotify` on makeDesktopItem ask for "true" or "false" strings,
+      # `startupNotify` on makeDesktopItem asks for "true" or "false" strings,
       # for usability's sake we ask for a boolean.
 
       # `mimeType` and `categories` on makeDesktopItem ask for a string in the format "one;two;three;",
       # for the same reason we ask for a list of strings.
-
-      # `fileValidation` isn't exposed for simplicity's sake
 
       # Descriptions are taken from the desktop entry spec: 
       # https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
@@ -91,9 +90,31 @@ let
       };
 
       extraConfig = mkOption {
-        description = "Extra lines to add to the desktop file.";
-        type = types.nullOr types.lines;
-        default = null;
+        description = ''
+          Extra configuration. Will be appended to the end of the file and 
+          may thus contain extra sections.
+        '';
+        type = types.lines;
+        default = "";
+      };
+
+      settings = mkOption {
+        type = types.attrsOf types.string;
+        description = ''
+          Extra key-value pairs to add to the [Desktop Entry] section. 
+          This may override other values.
+        '';
+        default = { };
+        example = {
+          Keywords = "calc;math";
+          DBusActivatable = "false";
+        };
+      };
+
+      fileValidation = mkOption {
+        type = types.bool;
+        description = "Whether to validate the generated desktop file.";
+        default = true;
       };
     };
   };
@@ -104,7 +125,7 @@ let
   semicolonList = list:
     (concatStringsSep ";" list) + ";"; # requires trailing semicolon
 
-  #passing config options to makeDesktopItem in expected format
+  #passes config options to makeDesktopItem in expected format
   makeFile = name: config:
     pkgs.makeDesktopItem {
       name = name;
@@ -112,7 +133,7 @@ let
       exec = config.exec;
       icon = config.icon;
       comment = config.comment;
-      terminal = ifNotNull config.terminal (stringBool config.terminal);
+      terminal = config.terminal;
       desktopName = config.name;
       genericName = config.genericName;
       mimeType = ifNotNull config.mimeType (semicolonList config.mimeType);
@@ -121,6 +142,7 @@ let
       startupNotify =
         ifNotNull config.startupNotify (stringBool config.startupNotify);
       extraEntries = config.extraConfig;
+      extraDesktopEntries = config.settings;
     };
 in {
   meta.maintainers = with maintainers; [ cwyc ];
